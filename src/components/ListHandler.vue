@@ -8,17 +8,38 @@
         </h1>
       </mdb-col>
     </mdb-row>
-    <!-- adding / editing -->
+    <!-- adding / editing /saving -->
     <mdb-row>
       <mdb-col>
         <form action class="form-inline">
-          <mdb-input type="text" placeholder="Your To Do.." size="md" v-model="newItem"></mdb-input>
+          <mdb-input
+            type="text"
+            placeholder="Your To Do.."
+            size="md"
+            v-model="newItem"
+            v-on:keyup.enter="addItem"
+          ></mdb-input>
           <mdb-btn-toolbar>
             <mdb-btn-group>
-              <mdb-btn color="primary" icon="plus-circle" size="sm" @click="addItem">add</mdb-btn>
-              <mdb-btn color="warning" icon="magic" size="sm" @click="editReflectedItem">edit</mdb-btn>
+              <mdb-btn
+                color="primary"
+                icon="plus-circle"
+                size="sm"
+                @click="addItem"
+                >add</mdb-btn
+              >
+              <mdb-btn
+                color="warning"
+                icon="magic"
+                size="sm"
+                @click="editReflectedItem"
+                >edit</mdb-btn
+              >
             </mdb-btn-group>
           </mdb-btn-toolbar>
+          <mdb-btn icon="save" iconColor="white" @click="sendToFirebase"
+            >Save</mdb-btn
+          >
         </form>
       </mdb-col>
     </mdb-row>
@@ -26,7 +47,7 @@
     <mdb-row class="list__items" v-for="(info, index) in infos" :key="index">
       <mdb-col xs="6">
         <ul class="list__main">
-          <li :class="{done: info.done}">{{info.duty}}</li>
+          <li :class="{ done: info.done }">{{ info.duty }}</li>
         </ul>
       </mdb-col>
       <mdb-col xs="6">
@@ -37,7 +58,7 @@
               color="success"
               icon="check"
               size="sm"
-              @click="doneList('do',index)"
+              @click="doneList('do', index)"
             ></mdb-btn>
             <mdb-btn
               v-show="info.done"
@@ -45,10 +66,20 @@
               outline="success"
               icon="redo-alt"
               size="sm"
-              @click="doneList('rearrange',index)"
+              @click="doneList('rearrange', index)"
             ></mdb-btn>
-            <mdb-btn color="warning" icon="edit" size="sm" @click="editList(index)"></mdb-btn>
-            <mdb-btn color="danger" icon="trash-alt" size="sm" @click="deleteList(index)"></mdb-btn>
+            <mdb-btn
+              color="warning"
+              icon="edit"
+              size="sm"
+              @click="editList(index)"
+            ></mdb-btn>
+            <mdb-btn
+              color="danger"
+              icon="trash-alt"
+              size="sm"
+              @click="deleteList(index)"
+            ></mdb-btn>
           </mdb-btn-group>
         </mdb-btn-toolbar>
       </mdb-col>
@@ -57,6 +88,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import {
   mdbCol,
   mdbRow,
@@ -64,7 +96,7 @@ import {
   mdbBtnGroup,
   mdbBtnToolbar,
   mdbBtn
-} from "mdbvue";
+} from 'mdbvue'
 export default {
   components: {
     mdbCol,
@@ -76,45 +108,64 @@ export default {
   },
   data() {
     return {
-      newItem: "",
-      infos: [
-        {
-          duty: "Living Happily",
-          done: false,
-          selected: false
-        },
-        {
-          duty: "Playing Football",
-          done: true,
-          selected: false
-        }
-      ],
+      newItem: '',
+      infos: [],
       reflected: 0
-    };
+    }
+  },
+  created() {
+    axios
+      .get('https://todolist-245ae.firebaseio.com/lists.json')
+      .then(response => {
+        // JSON responses are automatically parsed.
+        const data = response.data
+        const infos = []
+        for (const key in data) {
+          const listItem = data[key]
+          infos.unshift(listItem)
+        }
+        // this.infosu obj yapar başka türlü push yapamıyor
+        this.infos = infos[0] === undefined ? [] : infos[0]
+      })
+      .catch(e => {
+        console.log(e)
+      })
   },
   methods: {
     deleteList(i) {
-      this.infos.splice(i, 1);
+      this.infos.splice(i, 1)
     },
     doneList(text, i) {
-      this.infos[i].done = text === "do" ? true : false;
+      this.infos[i].done = text === 'do' ? true : false
     },
     addItem() {
       if (this.newItem == false) {
-        return;
+        return
       }
-      this.infos.push({ duty: this.newItem, done: false, selected: false });
-      this.newItem = "";
+      console.log(this.newItem)
+      this.infos.push({ duty: this.newItem, done: false })
+      this.newItem = ''
     },
     editList(i) {
-      this.newItem = this.infos[i].duty;
-      this.reflected = i;
+      this.newItem = this.infos[i].duty
+      this.reflected = i
     },
     editReflectedItem() {
-      this.infos[this.reflected].duty = this.newItem;
+      if (this.newItem == false) {
+        return
+      }
+      this.infos[this.reflected].duty = this.newItem
+      this.newItem = ''
+    },
+    sendToFirebase() {
+      const deneme = this.infos
+      axios
+        .post('https://todolist-245ae.firebaseio.com/lists.json', deneme)
+        .then(res => console.log(res))
+        .catch(err => console.log(err))
     }
   }
-};
+}
 </script>
 
 <style lang="scss">

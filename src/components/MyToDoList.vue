@@ -12,9 +12,9 @@
 </template>
 
 <script>
-import { mdbBtn } from "mdbvue";
+import { mdbBtn } from 'mdbvue'
 export default {
-  name: "MyToDoList",
+  name: 'MyToDoList',
   components: {
     mdbBtn
   },
@@ -22,10 +22,10 @@ export default {
     msg: String
   },
   data() {
-    return {};
+    return {}
   },
   methods: {}
-};
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -34,9 +34,10 @@ h3 {
   font-weight: normal;
   padding-top: 20px;
   padding-bottom: 30px;
+  color: white;
 }
 p {
-  color: #969696;
+  color: white;
   margin-bottom: 0;
   font-size: 2rem;
 }
