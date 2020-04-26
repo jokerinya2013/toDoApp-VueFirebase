@@ -21,25 +21,11 @@
           ></mdb-input>
           <mdb-btn-toolbar>
             <mdb-btn-group>
-              <mdb-btn
-                color="primary"
-                icon="plus-circle"
-                size="sm"
-                @click="addItem"
-                >add</mdb-btn
-              >
-              <mdb-btn
-                color="warning"
-                icon="magic"
-                size="sm"
-                @click="editReflectedItem"
-                >edit</mdb-btn
-              >
+              <mdb-btn color="primary" icon="plus-circle" size="sm" @click="addItem">add</mdb-btn>
+              <mdb-btn color="warning" icon="magic" size="sm" @click="editReflectedItem">edit</mdb-btn>
             </mdb-btn-group>
           </mdb-btn-toolbar>
-          <mdb-btn icon="save" iconColor="white" @click="sendToFirebase"
-            >Save</mdb-btn
-          >
+          <mdb-btn icon="save" iconColor="white" @click="sendToFirebase">Save</mdb-btn>
         </form>
       </mdb-col>
     </mdb-row>
@@ -68,18 +54,8 @@
               size="sm"
               @click="doneList('rearrange', index)"
             ></mdb-btn>
-            <mdb-btn
-              color="warning"
-              icon="edit"
-              size="sm"
-              @click="editList(index)"
-            ></mdb-btn>
-            <mdb-btn
-              color="danger"
-              icon="trash-alt"
-              size="sm"
-              @click="deleteList(index)"
-            ></mdb-btn>
+            <mdb-btn color="warning" icon="edit" size="sm" @click="editList(index)"></mdb-btn>
+            <mdb-btn color="danger" icon="trash-alt" size="sm" @click="deleteList(index)"></mdb-btn>
           </mdb-btn-group>
         </mdb-btn-toolbar>
       </mdb-col>
@@ -88,7 +64,7 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from "axios";
 import {
   mdbCol,
   mdbRow,
@@ -96,7 +72,7 @@ import {
   mdbBtnGroup,
   mdbBtnToolbar,
   mdbBtn
-} from 'mdbvue'
+} from "mdbvue";
 export default {
   components: {
     mdbCol,
@@ -108,64 +84,68 @@ export default {
   },
   data() {
     return {
-      newItem: '',
+      newItem: "",
       infos: [],
       reflected: 0
-    }
+    };
   },
   created() {
     axios
-      .get('https://todolist-245ae.firebaseio.com/lists.json')
+      .get("https://todolist-245ae.firebaseio.com/lists.json")
       .then(response => {
         // JSON responses are automatically parsed.
-        const data = response.data
-        const infos = []
-        for (const key in data) {
-          const listItem = data[key]
-          infos.unshift(listItem)
+        const data = response.data;
+        const loadedList = [];
+        for (const item in data) {
+          const element = data[item];
+          loadedList.push(element);
         }
-        // this.infosu obj yapar başka türlü push yapamıyor
-        this.infos = infos[0] === undefined ? [] : infos[0]
+        this.infos = loadedList[loadedList.length - 1];
+        this.infos = this.infos[0].empty === true ? [] : this.infos;
       })
       .catch(e => {
-        console.log(e)
-      })
+        console.log(e);
+      });
   },
+
   methods: {
     deleteList(i) {
-      this.infos.splice(i, 1)
+      this.infos.splice(i, 1);
     },
     doneList(text, i) {
-      this.infos[i].done = text === 'do' ? true : false
+      this.infos[i].done = text === "do" ? true : false;
     },
     addItem() {
-      if (this.newItem == false) {
-        return
+      if (!this.newItem) {
+        return;
       }
-      console.log(this.newItem)
-      this.infos.push({ duty: this.newItem, done: false })
-      this.newItem = ''
+      console.log(this.newItem);
+      this.infos.push({ duty: this.newItem, done: false, empty: false });
+      this.newItem = "";
     },
     editList(i) {
-      this.newItem = this.infos[i].duty
-      this.reflected = i
+      this.newItem = this.infos[i].duty;
+      this.reflected = i;
     },
     editReflectedItem() {
       if (this.newItem == false) {
-        return
+        return;
       }
-      this.infos[this.reflected].duty = this.newItem
-      this.newItem = ''
+      this.infos[this.reflected].duty = this.newItem;
+      this.newItem = "";
     },
     sendToFirebase() {
-      const deneme = this.infos
+      if (!this.infos.length) {
+        this.infos.push({ empty: true });
+      }
       axios
-        .post('https://todolist-245ae.firebaseio.com/lists.json', deneme)
+        .post("https://todolist-245ae.firebaseio.com/lists.json", this.infos)
         .then(res => console.log(res))
-        .catch(err => console.log(err))
+        .catch(err => console.log(err));
+      this.infos = this.infos[0].empty === true ? [] : this.infos;
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
